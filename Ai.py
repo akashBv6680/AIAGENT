@@ -5,9 +5,9 @@ import streamlit as st
 # Load API key securely from Streamlit secrets
 api_key = st.secrets["GEMINI_API_KEY"]
 
-# Set Gemini model name
-# Options: "gemini-2.5-flash", "gemini-2.0-flash", or "gemini-1.5-flash"
-model = "gemini-2.5-flash"
+# Set updated Gemini model name
+# Options for new API keys: "gemini-3.6-flash", "gemini-3.5-flash", or "gemini-3.1-flash-lite"
+model = "gemini-3.6-flash"
 endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
 # Set custom styling and background
@@ -31,7 +31,7 @@ def get_response(query):
 
     try:
         response = requests.post(endpoint, headers=headers, params=params, json=data)
-        
+
         if response.status_code == 200:
             response_json = response.json()
             return response_json["candidates"][0]["content"]["parts"][0]["text"]
