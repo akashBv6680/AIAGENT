@@ -1,44 +1,45 @@
-import streamlit as st
 import os
 import requests
+import streamlit as st
 
-# Set API key
-api_key = "4141f2d62dc1abfc5533c7756bbdc12fc8862a85db140eaec63adc83efa97a5d"
+# Load API key securely from Streamlit secrets
+api_key = st.secrets["GEMINI_API_KEY"]
 
-# Set API endpoint and model
-endpoint = "https://api.together.xyz/v1/chat/completions"
-model = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+# Set Gemini model name
+# Options: "gemini-2.5-flash", "gemini-2.0-flash", or "gemini-1.5-flash"
+model = "gemini-2.5-flash"
+endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
-# Set background image
+# Set custom styling and background
 st.markdown(
-    f"""
+    """
     <style>
-    .stApp {{
+    .stApp {
         background-image: url("https://raw.githubusercontent.com/akashBv6680/ashwinai/main/white.png");
         background-size: cover;
-    }}
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
+
 def get_response(query):
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "model": model,
-        "messages": [{"role": "user", "content": query}],
-        "max_tokens": 512,
-        "temperature": 0
-    }
-    response = requests.post(endpoint, headers=headers, json=data)
-    if response.status_code == 200:
-        response_json = response.json()
-        return response_json["choices"][0]["message"]["content"]
-    else:
-        return "Error: " + str(response.status_code)
+    headers = {"Content-Type": "application/json"}
+    params = {"key": api_key}
+    data = {"contents": [{"parts": [{"text": query}]}]}
+
+    try:
+        response = requests.post(endpoint, headers=headers, params=params, json=data)
+        
+        if response.status_code == 200:
+            response_json = response.json()
+            return response_json["candidates"][0]["content"]["parts"][0]["text"]
+        else:
+            return f"Error: {response.status_code} - {response.text}"
+    except Exception as e:
+        return f"An error occurred: {str(e)}"
+
 
 def main():
     st.title("HELLO I'M BHEEMA AI Chatbot")
@@ -46,6 +47,7 @@ def main():
     if query:
         response = get_response(query)
         st.write("BHEEMA AI: ", response)
+
 
 if __name__ == "__main__":
     main()
